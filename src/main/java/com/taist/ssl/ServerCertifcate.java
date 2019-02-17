@@ -17,10 +17,10 @@ public class ServerCertifcate {
   
   
     public static boolean byteEquals(byte a[],byte[] b){  
-        boolean equals=true;  
-        if(a==null || b==null){  
+        boolean equals=true;
+        if(a==null || b==null){
             equals=false;  
-        }  
+        }
   
         if(a!=null && b!=null){  
             if(a.length!=b.length){  
@@ -32,10 +32,9 @@ public class ServerCertifcate {
                         break;  
                     }  
                 }
-            }  
-  
-        }  
-        return equals;  
+            }
+        }
+        return equals;
     }
   
     public byte[] decrypt(byte data[]) throws Exception{  

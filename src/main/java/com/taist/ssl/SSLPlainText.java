@@ -1,6 +1,7 @@
 package com.taist.ssl;
 
 import com.taist.helper.ByteHelper;
+import com.taist.ssl.fragment.*;
 
 public class SSLPlainText {
 	public ContentType getType() {
@@ -56,6 +57,17 @@ public class SSLPlainText {
 		length = ByteHelper.toInt(data, 3, 2);
 		fragment = getFragment(ByteHelper.subarray(data, 5, length));
 	}
+
+	public byte[] getBytes(){
+		byte[] bts = new byte[]{
+				type.getCode(),
+				majorVersion,
+				minorVersion
+		};
+		bts = ByteHelper.concat(bts, ByteHelper.fromInt16(length));
+		bts = ByteHelper.concat(bts, fragment.getBytes());
+		return bts;
+	}
 	
 	private Fragment getFragment(byte[] fragmentData) {
 		switch (type) {
@@ -66,10 +78,9 @@ public class SSLPlainText {
 		case change_cipher_spec:
 			return new ChangeCipherSpecFragment(fragmentData);
 		case application_data:
-			System.out.println("application_data" + length + " " + fragmentData.length);
 			return new ApplicationDataFragment(fragmentData);
 		default:
-			return null;
+			return new UnknownDataFragment(fragmentData);
 		}
 	}
 

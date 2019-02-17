@@ -1,8 +1,10 @@
-package com.taist.ssl;
+package com.taist.ssl.fragment;
 
 import com.taist.helper.ByteHelper;
+import com.taist.ssl.Fragment;
+import com.taist.ssl.HandshakeType;
 
-public class HandshakeFragment implements Fragment {
+public class HandshakeFragment extends AbstractFragment {
 	public HandshakeType getType() {
 		return type;
 	}
@@ -32,52 +34,66 @@ public class HandshakeFragment implements Fragment {
 	private Fragment fragment;
 	
 	public HandshakeFragment(byte[] data) {
+		super(data);
 		type = getType(data[0]);
+		if(type == HandshakeType.unknown){
+			System.out.println("Unknow handshake type " + data[0]);
+			return;
+		}
 		length = ByteHelper.toInt(data, 1, 3);
 		fragment = getFragment(ByteHelper.subarray(data, 4, length));
 	}
 	
 	@Override
 	public byte[] getBytes() {
-		return null;
+		if(type == HandshakeType.unknown){
+			return super.getBytes();
+		}
+		else{
+			data = new byte[]{
+					type.getCode()
+			};
+			data = ByteHelper.concat(data, ByteHelper.fromInt24(length));
+			data = ByteHelper.concat(data, fragment.getBytes());
+			return data;
+		}
 	}
 	
 	private Fragment getFragment(byte[] fragmentData) {
 		switch (type) {
 		case certificate:
 			System.out.println("<< certificate");
-			System.out.println(ByteHelper.toString(fragmentData));
-			return null;
+			return new CertificateDataFragment(fragmentData);
 		case certificate_verify:
 			System.out.println(">> certificate_verify");
-			return null;
+			return new UnknownDataFragment(fragmentData);
 		case client_hello:
 			System.out.println(">> client_hello");
-			return null;
+            return new UnknownDataFragment(fragmentData);
 		case certificate_request:
 			System.out.println(">> certificate_request");
-			return null;
+            return new UnknownDataFragment(fragmentData);
 		case client_key_exchange:
 			System.out.println(">> client_key_exchange");
-			return null;
+            return new UnknownDataFragment(fragmentData);
 		case hello_request:
 			System.out.println(">> hello_request");
-			return null;
+            return new UnknownDataFragment(fragmentData);
 		case server_hello:
 			System.out.println("<< server_hello");
-			return null;
+            return new UnknownDataFragment(fragmentData);
 		case finished:
 			System.out.println("<< finished");
-			return null;
+            return new UnknownDataFragment(fragmentData);
 		case server_hello_done:
 			System.out.println("<< server_hello_done");
-			return null;
+            return new UnknownDataFragment(fragmentData);
 		case server_key_exchange:
 			System.out.println("<< server_key_exchange");
-			return null;
+            return new UnknownDataFragment(fragmentData);
 		default:
 			System.out.println("<< default");
-			return null;
+			return new UnknownDataFragment(fragmentData);
 		}
 	}
 	
@@ -89,6 +105,6 @@ public class HandshakeFragment implements Fragment {
 			}
 		}
 		
-		return HandshakeType.blank;
+		return HandshakeType.unknown;
 	}
 }

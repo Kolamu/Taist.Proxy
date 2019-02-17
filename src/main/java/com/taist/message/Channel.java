@@ -8,6 +8,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.SecureRandom;
+import java.util.List;
 import java.util.Random;
 
 import javax.crypto.Cipher;
@@ -19,7 +20,12 @@ import com.taist.proxy.HttpReceiver;
 import com.taist.proxy.HttpsReceiver;
 import com.taist.proxy.Receiver;
 import com.taist.proxy.Sender;
+import com.taist.ssl.ContentType;
+import com.taist.ssl.HandshakeType;
+import com.taist.ssl.SSLPacket;
 import com.taist.ssl.SSLPlainText;
+import com.taist.ssl.fragment.CertificateDataFragment;
+import com.taist.ssl.fragment.HandshakeFragment;
 
 public class Channel implements Runnable {
 	private Receiver receiver = null;
@@ -73,25 +79,54 @@ public class Channel implements Runnable {
 	private void handShake() {
 		Receiver receiver = configuration.getReciever();
 		Sender sender = configuration.getSender();
-		
+
+		// client hello
 		RequestBody req = receiver.receive();
-		SSLPlainText clientHello = new SSLPlainText(req.getData());
+        SSLPacket packet = new SSLPacket(req.getData());
 		sender.execute(req);
+        System.out.println("*********************************************************");
+		// server hello
+        // certificate
+        // server key exchange
+        // server hello done
 		ResponseBody res = sender.receive();
-		SSLPlainText serverHello = new SSLPlainText(res.getData());
-		System.out.println(serverHello.getLength());
-		System.out.println(res.getData().length);
-		System.out.println(ByteHelper.toString(res.getData()));
-		receiver.execute(res);
-		req = receiver.receive();
-		SSLPlainText client = new SSLPlainText(req.getData());
-		sender.execute(req);
-		res = sender.receive();
-		SSLPlainText certificate = new SSLPlainText(res.getData());
-		receiver.execute(res);
-		res = sender.receive();
-		SSLPlainText server_key_exchange = new SSLPlainText(res.getData());
-		receiver.execute(res);
+        packet = new SSLPacket(res.getData());
+
+        List<SSLPlainText> textlist = packet.getRequestList();
+        for(SSLPlainText text : textlist){
+            HandshakeFragment handshake = (HandshakeFragment) text.getFragment();
+            if(handshake.getType() == HandshakeType.certificate){
+                CertificateDataFragment cert = (CertificateDataFragment) handshake.getFragment();
+                System.out.println(ByteHelper.toString(cert.getBytes()));
+            }
+        }
+        receiver.execute(res);
+
+        System.out.println("*********************************************************");
+
+        req = receiver.receive();
+        packet = new SSLPacket(req.getData());
+        sender.execute(req);
+        res = sender.receive();
+        packet = new SSLPacket(res.getData());
+        receiver.execute(res);
+
+        System.out.println("*********************************************************");
+
+        req = receiver.receive();
+        packet = new SSLPacket(req.getData());
+
+        sender.execute(req);
+        res = sender.receive();
+        packet = new SSLPacket(res.getData());
+
+        receiver.execute(res);
+        req = receiver.receive();
+        packet = new SSLPacket(req.getData());
+
+        sender.execute(req);
+        res = sender.receive();
+        packet = new SSLPacket(res.getData());
 	}
 
 	public ChannelConfig getConfiguration() {

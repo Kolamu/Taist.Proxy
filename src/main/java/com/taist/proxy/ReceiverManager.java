@@ -33,13 +33,13 @@ public final class ReceiverManager {
 	public void close() {
 		running = false;
 		ProxyHelper.safeClose(socket);
+
 	}
 	
 	private class ReceiverHandler extends Thread {
 		public ReceiverHandler() {
 			
 			super(new Runnable() {
-				
 				public void run() {
 					while(running) {
 						try {

@@ -1,4 +1,4 @@
-package com.bj58.qa.agent;
+package com.taist.agent;
 
 import java.io.IOException;
 import java.io.InputStream;

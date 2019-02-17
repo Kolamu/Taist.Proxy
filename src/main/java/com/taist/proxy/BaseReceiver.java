@@ -47,7 +47,7 @@ public class BaseReceiver implements Receiver {
 			if(!running) {
 				throw new InterruptedException();
 			}
-			ProxyHelper.sleep(50);
+			Thread.sleep(10);
 		}
 		return ProxyHelper.read(socket);
 	}

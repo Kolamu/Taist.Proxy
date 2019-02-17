@@ -11,14 +11,14 @@ public enum HandshakeType {
     certificate_verify(15),
     client_key_exchange(16),
     finished(20),
-    blank(255);
+    unknown(255);
 	
-	private int code = 255;
+	private byte code = -1;
 	HandshakeType(int code){
-		this.code = code;
+		this.code = (byte)code;
 	}
 	
-	public int getCode() {
+	public byte getCode() {
 		return code;
 	}
 }
