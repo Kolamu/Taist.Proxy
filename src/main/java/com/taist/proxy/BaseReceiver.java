@@ -3,6 +3,7 @@ package com.taist.proxy;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.SocketException;
+import java.nio.channels.SocketChannel;
 
 import com.taist.helper.ProxyHelper;
 import com.taist.message.RequestBody;
@@ -14,14 +15,6 @@ public class BaseReceiver implements Receiver {
 	
 	public BaseReceiver(Socket socket) {
 		this.socket = socket;
-		try {
-			socket.setSoTimeout(0);
-			socket.setKeepAlive(true);
-			socket.setReceiveBufferSize(81920);
-			socket.setSendBufferSize(81920);
-		} catch (SocketException e) {
-			e.printStackTrace();
-		}
 	}
 	
 	public void execute(ResponseBody response) {
